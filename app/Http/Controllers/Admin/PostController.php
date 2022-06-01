@@ -58,7 +58,7 @@ class PostController extends Controller
         }
         $newPost->slug = $altSlug;
         $newPost->save();
-        return redirect()->route('admin.posts .index');
+        return redirect()->route('admin.posts.index');
     }
 
     /**
@@ -69,7 +69,9 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        //
+        $post = Post::find($id);
+
+        return view('admin.posts.show', compact('post'));
     }
 
     /**
@@ -80,7 +82,9 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        //
+        $post = Post::find($id);
+
+        return view('admin.posts.edit', compact('post'));
     }
 
     /**
@@ -92,7 +96,22 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $post = new Post();
+        $post = Post::findOrFail($id);
+        $data = $request->all();
+        $post->fill($data);
+        $slug = Str::slug($post->title);
+        $found = Post::where('slug', $slug)->first();
+        $count = 1;
+        $altSlug = $slug;
+        while ($found) {
+            $altSlug = $slug . '_' . $count;
+            $count++;
+            $found = Post::where('slug', $altSlug)->first();
+        }
+        $post->slug = $altSlug;
+        $post->save();
+        return redirect()->route('admin.posts.index');
     }
 
     /**
@@ -103,6 +122,8 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Post::findOrFail($id);
+        $post->delete();
+        return redirect()->route('admin.posts.index');
     }
 }
